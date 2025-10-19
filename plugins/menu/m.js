@@ -170,7 +170,7 @@ Jika melanggar rules diatas akan di banned dari bot.`;
 
     try {
       await conn.sendMessage(chatId, buttonMessage, { quoted: qkontak });
-      await conn.sendMessage(chatId, { audio: { url: 'https://2007.filemail.com/api/file/get?filekey=ejZ4XrEplDyJI9_7b02cmZ64kqtDcbt53LOQpos5QyEuRH71j-eRhMA&pk_vid=6994a7c80502273017592466818e3ca3' }, mimetype: 'audio/mpeg', ptt: true }, { quoted: qkontak });
+    //  await conn.sendMessage(chatId, { audio: { url: 'https://2007.filemail.com/api/file/get?filekey=ejZ4XrEplDyJI9_7b02cmZ64kqtDcbt53LOQpos5QyEuRH71j-eRhMA&pk_vid=6994a7c80502273017592466818e3ca3' }, mimetype: 'audio/mpeg', ptt: true }, { quoted: qkontak });
 
     } catch (error) {
       console.error("Gagal mengirim pesan:", error);
