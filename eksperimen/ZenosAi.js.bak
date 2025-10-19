@@ -1,0 +1,94 @@
+const axios = require('axios');
+const FormData = require('form-data');
+const fs = require('fs');
+const path = require('path');
+const { downloadMediaMessage } = require('@whiskeysockets/baileys');
+
+module.exports = {
+  name: 'zenos',
+  command: ['zenos'],
+  tags: 'Maker Menu',
+  desc: 'Mengubah gambar menjadi sesuai keinginan',
+  prefix: true,
+  run: async (conn, msg, { args, chatInfo }) => {
+    const { chatId } = chatInfo;
+
+    // Ambil pesan yang dibalas (kalau ada)
+    const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+    const quotedImage = quoted?.imageMessage;
+    const mainImage = msg.message?.imageMessage;
+
+    // Pastikan yang dikirim / dibalas adalah gambar
+    const targetImage = quotedImage || mainImage;
+    if (!targetImage) {
+      return conn.sendMessage(chatId, {
+        text: '⚠️ Kirim atau balas *gambar* dengan perintah:\n\n*.zenos <prompt>*\n\nContoh: *.zenos anime style*',
+      }, { quoted: msg });
+    }
+
+    const prompt = args.join(' ').trim();
+    if (!prompt) {
+      return conn.sendMessage(chatId, {
+        text: '⚠️ Masukkan prompt setelah command!\nContoh: *.zenos anime style*',
+      }, { quoted: msg });
+    }
+
+    try {
+      await conn.sendMessage(chatId, { react: { text: '🕒', key: msg.key } });
+
+      // Tentukan pesan sumber media
+      const mediaSource = quotedImage ? { message: { imageMessage: quotedImage } } : msg;
+
+      // Unduh gambar
+      const buffer = await downloadMediaMessage(
+        mediaSource,
+        'buffer',
+        {},
+        { logger: conn.logger, reuploadRequest: conn.updateMediaMessage }
+      );
+
+      if (!buffer) throw new Error('Gagal mengunduh gambar.');
+
+      // Simpan sementara
+      const tempPath = path.join(__dirname, `zenos_${Date.now()}.jpg`);
+      fs.writeFileSync(tempPath, buffer);
+
+      // Upload ke Catbox
+      const form = new FormData();
+      form.append('reqtype', 'fileupload');
+      form.append('fileToUpload', fs.createReadStream(tempPath));
+
+      const upload = await axios.post('https://catbox.moe/user/api.php', form, {
+        headers: form.getHeaders(),
+      });
+
+      fs.unlinkSync(tempPath);
+
+      const imageUrl = upload.data;
+      if (!imageUrl || typeof imageUrl !== 'string') {
+        throw new Error('Gagal upload gambar ke Catbox.');
+      }
+
+      // Kirim ke API AI
+      const apiUrl = `https://api.fikmydomainsz.xyz/ai/nanobnna?url=${encodeURIComponent(imageUrl)}&prompt=${encodeURIComponent(prompt)}`;
+      const aiRes = await axios.get(apiUrl);
+
+      if (!aiRes.data?.status || !aiRes.data?.result) {
+        throw new Error('Gagal mendapatkan hasil dari API.');
+      }
+
+      await conn.sendMessage(chatId, { react: { text: '✅', key: msg.key } });
+      await conn.sendMessage(chatId, {
+        image: { url: aiRes.data.result },
+        caption: `✅ *Zenos AI Result*\n🧠 Prompt: ${prompt}`,
+      }, { quoted: msg });
+
+    } catch (err) {
+      console.error('[Zenos Error]', err);
+      await conn.sendMessage(chatId, { react: { text: '❌', key: msg.key } });
+      conn.sendMessage(chatId, {
+        text: `❌ Terjadi kesalahan: "${err.message}"`,
+      }, { quoted: msg });
+    }
+  }
+};

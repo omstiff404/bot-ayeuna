@@ -1,0 +1,20 @@
+{
+  "storeSetting": {
+    "sewa": [
+      {
+        "name": "1-bulan",
+        "price": "10k"
+      },
+      {
+        "name": "2-bulan",
+        "price": "15k"
+      },
+      {
+        "name": "3-bulan",
+        "price": "20k"
+      }
+    ],
+    "sewa-bot-elaina": [],
+    "shoplimit": []
+  }
+}

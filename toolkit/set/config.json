@@ -1,0 +1,105 @@
+{
+  "ownerSetting": {
+    "ownerNumber": [
+      "6283879685072"
+    ],
+    "ownerName": "OmStiffYT",
+    "contact": "6283879685072",
+    "ownerLink": {
+      "tt": "https://tiktok.com/@omstiff404",
+      "yt": "https://youtube.com/c/omstiff404",
+      "ig": "https://instagram.com/@omstiff404",
+      "fb": ""
+    },
+    "ownerStore": {
+      "dana": "083879685072",
+      "gopay": "083879685072",
+      "ovo": "083879685072"
+    },
+    "forOwner": true
+  },
+  "botSetting": {
+    "botName": "ZenosBOT",
+    "botFullName": "ZenosBOT-𝟸𝟶𝟸𝟻",
+    "type": "plugin",
+    "footer": "",
+    "thumbnail": "https://files.catbox.moe/9vwa58.png",
+    "sendTextLink": {
+      "chshort": "https://chat.whatsapp.com/CpXzlsfDOvj2OzDifhwH33?mode=ems_copy_t",
+      "gcshort": "",
+      "music": ""
+    },
+    "autoread": {
+      "group": true,
+      "private": true
+    },
+    "Mode": "group",
+    "autoTyping": false,
+    "public": true,
+    "autoBio": false,
+    "bioText": "Lah Aku mah Ganteng",
+    "logic": "not bad"
+  },
+  "menuSetting": {
+    "brackets": [
+      "",
+      ""
+    ],
+    "idCh": "120363319682079836@newsletter",
+    "frame": {
+      "head": "╭────✿",
+      "body": "│",
+      "foot": "╰"
+    },
+    "garis": "───────────✿",
+    "side": "│",
+    "btn": "✦",
+    "isPrefix": [
+      ".",
+      ",",
+      "#",
+      "?",
+      "/"
+    ]
+  },
+  "pluginCategories": {
+    "Owner Menu": "Perintah untuk owner elaina",
+    "Fun Menu": "Menu fun",
+    "Info Menu": "Info dari menu",
+    "Download Menu": "Unduh media dari internet",
+    "Tools Menu": "Alat bantu berguna",
+    "Shop Menu": "Menu Shop",
+    "Group Menu": "Menu Group",
+    "Game Menu": "Menampilkan Menu Game",
+    "Toko Menu": "Menampilkan toko menu",
+    "Ai Menu": "Menampilkan menu ai",
+    "Other Menu": "Fitur lainnya"
+  },
+  "msg": {
+    "rejectMsg": {
+      "isPremium": "kamu aja syg",
+      "isOwner": "hmm aja",
+      "forOwnerText": "Selamat Datang Kembali Owner Ku"
+    }
+  },
+  "apiKey": {
+    "kuromi": {
+      "key": "yn9dxsl9w4",
+      "web": "https://api-kuromi-jet.vercel.app"
+    },
+    "zellApi": {
+      "web": "https://apizell.web.id"
+    },
+    "siputKey": {
+      "web": "https://api.siputzx.my.id"
+    },
+    "HamzApi": {
+      "key": "YOUR API KEY",
+      "web": "https://api.hamsoffc.me"
+    },
+    "termai": {
+      "key": "Bell409",
+      "web": "https://api.termai.cc"
+    }
+  }
+}

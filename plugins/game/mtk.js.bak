@@ -1,0 +1,150 @@
+const { savetube } = require('../../toolkit/scrape/yt.js');
+
+module.exports = {
+  name: 'youtube',
+  command: ['youtube', 'yt'],
+  tags: 'Download Menu',
+  desc: 'Download video dari YouTube.',
+  prefix: true,
+  premium: true,
+
+  run: async (conn, msg, { chatInfo, prefix, commandText, args }) => {
+    const { chatId, senderId } = chatInfo;
+    
+    if (!(await isPrem(module.exports, conn, msg))) return;
+
+    // Load session data dari FunctionGame
+    const data = global.load(global.pPath);
+    const gameData = global.bersih(data.FunctionGame || {});
+    data.FunctionGame = gameData;
+    global.save(data, global.pPath);
+
+    // Cek jika user sedang dalam session YouTube
+    const currentSession = Object.values(gameData).find(v => 
+      v.status && v.chatId === chatId && v.Nomor === senderId && v.tipe === 'youtube'
+    );
+
+    // Jika user reply dengan angka kualitas
+    if (currentSession && msg.text && /^[1-6]$/.test(msg.text.trim())) {
+      const selected = parseInt(msg.text.trim()) - 1;
+      const qualities = ['144', '240', '360', '480', '720', '1080'];
+      const quality = qualities[selected];
+      const url = currentSession.url;
+
+      // Hapus session langsung
+      delete gameData[currentSession.sessionKey];
+      data.FunctionGame = gameData;
+      global.save(data, global.pPath);
+
+      await conn.sendMessage(chatId, { react: { text: '🕒', key: msg.key } });
+
+      try {
+        await conn.sendMessage(chatId, { 
+          text: `✅ *Kualitas dipilih: ${quality}p*\n\n⏳ Sedang mendownload...\nTunggu sebentar ya!` 
+        }, { quoted: msg });
+
+        const hasil = await savetube.download(url, quality);
+        
+        if (!hasil || !hasil.status) {
+          return conn.sendMessage(chatId, { 
+            text: `❌ Gagal mengunduh video:\n${hasil?.error || 'Terjadi kesalahan.'}` 
+          }, { quoted: msg });
+        }
+
+        let text = `🎬 *YouTube Video Downloader*\n\n`;
+        text += `📛 *Judul:* ${hasil.result.title || '-'}\n`;
+        text += `⏱️ *Durasi:* ${hasil.result.duration || '-'}\n`;
+        text += `📺 *Kualitas:* ${quality}p\n`;
+        text += `📊 *Size:* ${hasil.result.downloaded || 'Unknown'}\n\n`;
+        text += `✅ *Berhasil didownload!*`;
+
+        await conn.sendMessage(chatId, {
+          video: { url: hasil.result.download },
+          caption: text,
+          fileName: `yt_${quality}p.mp4`
+        }, { quoted: msg });
+
+      } catch (error) {
+        console.error(error);
+        conn.sendMessage(chatId, { 
+          text: `❌ Gagal mendownload:\n${error.message}` 
+        }, { quoted: msg });
+      }
+      return;
+    }
+
+    // ===== JIKA BUKAN REPLY / SESSION BARU =====
+    if (!args[0]) {
+      return conn.sendMessage(chatId, { 
+        text: `❓ *Cara Penggunaan:*\n${prefix}${commandText} <url_video>\n\n*Contoh:*\n${prefix}${commandText} https://youtube.com/watch?v=xxxxx\n\n*Note:* Setelah itu balas dengan angka 1-6 untuk pilih kualitas` 
+      }, { quoted: msg });
+    }
+
+    const url = args[0];
+    
+    // Validasi URL
+    if (!url.includes('youtube.com/watch?v=') && !url.includes('youtu.be/') && !url.includes('youtube.com/shorts/')) {
+      return conn.sendMessage(chatId, { 
+        text: `❌ *URL tidak valid!*\n\nGunakan URL video YouTube seperti:\n• https://youtube.com/watch?v=...\n• https://youtu.be/...\n• https://youtube.com/shorts/...` 
+      }, { quoted: msg });
+    }
+
+    await conn.sendMessage(chatId, { react: { text: '🕒', key: msg.key } });
+
+    try {
+      // Tampilkan pilihan kualitas
+      const qualities = [
+        { number: '1', quality: '144', label: '144p (Kecil)' },
+        { number: '2', quality: '240', label: '240p (Low)' },
+        { number: '3', quality: '360', label: '360p (Standard)' },
+        { number: '4', quality: '480', label: '480p (Medium)' },
+        { number: '5', quality: '720', label: '720p (HD)' },
+        { number: '6', quality: '1080', label: '1080p (Full HD)' }
+      ];
+
+      let qualityText = `🎬 *YouTube Video Downloader*\n\n`;
+      qualityText += `📥 *URL:* ${url}\n\n`;
+      qualityText += `📺 *PILIH KUALITAS:*\n`;
+      
+      qualities.forEach(q => {
+        qualityText += `\n${q.number}. ${q.label}`;
+      });
+      
+      qualityText += `\n\n💬 *BALAS DENGAN ANGKA 1-6*`;
+
+      await conn.sendMessage(chatId, { 
+        text: qualityText 
+      }, { quoted: msg });
+
+      // Buat session baru di FunctionGame
+      const sessionKey = `yt${Date.now()}`;
+      gameData[sessionKey] = {
+        status: true,
+        Nomor: senderId,
+        chatId: chatId,
+        url: url,
+        sessionKey: sessionKey,
+        tipe: 'youtube', // Bedain dengan game lain
+        timestamp: Date.now()
+      };
+
+      data.FunctionGame = gameData;
+      global.save(data, global.pPath);
+
+    } catch (err) {
+      console.error(err);
+      
+      let errorMessage = '❌ Gagal memproses video.\n';
+      
+      if (err.message.includes('invalid link')) {
+        errorMessage += 'Pastikan URL video YouTube valid!';
+      } else {
+        errorMessage += 'Coba lagi nanti.';
+      }
+      
+      conn.sendMessage(chatId, { 
+        text: errorMessage 
+      }, { quoted: msg });
+    }
+  }
+};
